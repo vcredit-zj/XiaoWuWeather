@@ -5,26 +5,25 @@ import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.util.Log;
 
-import org.w3c.dom.Text;
-
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import okhttp3.Cookie;
 import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
 
 /**
  * 项目名称：XiaoWuWeather
  * 类描述：用来存储okhttpCookies
  * 创建人：伍跃武
  * 创建时间：2017/1/4 14:30
+ * 描述：http://www.jianshu.com/p/1a5f14b63f47
  */
 public class PersistentCookieStore {
     private static final String LOG_TAG = "PersistentCookieStore";
@@ -81,8 +80,70 @@ public class PersistentCookieStore {
         prefWriter.apply();
     }
 
+    /**
+     * 获取对应的url的cookie
+     *
+     * @param url
+     * @return
+     */
+    public List<Cookie> get(HttpUrl url) {
+        ArrayList<Cookie> ret = new ArrayList<>();
+        if (cookies.containsKey(url.host())) {
+            ret.addAll(cookies.get(url.host()).values());
+        }
+        return ret;
+    }
 
+    /**
+     * 获取所有的cookie值
+     *
+     * @return
+     */
+    public List<Cookie> getCookies() {
+        ArrayList<Cookie> ret = new ArrayList<>();
+        for (String key : cookies.keySet()) {
+            ret.addAll(cookies.get(key).values());
+        }
+        return ret;
+    }
 
+    /**
+     * 清空所有的cookie
+     *
+     * @return
+     */
+    public boolean removeAll() {
+        SharedPreferences.Editor prefsWriter = cookiesPrefs.edit();
+        prefsWriter.clear();
+        prefsWriter.apply();
+        cookies.clear();
+        return true;
+    }
+
+    /**
+     * 移除指定url的cookie
+     *
+     * @param url
+     * @param cookie
+     * @return
+     */
+    public boolean remove(HttpUrl url, Cookie cookie) {
+        String name = getCookieToken(cookie);
+        if (cookies.containsKey(url.host())
+                && cookies.get(url.host()).containsKey(name)) {
+            cookies.get(url.host()).remove(name);
+            SharedPreferences.Editor prefsWriter = cookiesPrefs.edit();
+            if (cookiesPrefs.contains(name)) {
+                prefsWriter.remove(name);
+            }
+            prefsWriter.putString(url.host(),
+                    TextUtils.join(",", cookies.get(url.host()).keySet()));
+            prefsWriter.apply();
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     /**
      * cookies 序列化成 string
@@ -104,9 +165,6 @@ public class PersistentCookieStore {
         }
         return byteArrayToHexString(os.toByteArray());
     }
-
-
-
 
 
     /**
