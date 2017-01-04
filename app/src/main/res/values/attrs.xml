@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="TitleBar">
+        <attr name="leftIcon" format="reference" />
+        <attr name="leftDecrs" format="string" />
+        <attr name="middleText" format="string" />
+        <attr name="rigtIcon" format="reference" />
+        <attr name="isTransparent" format="boolean" />
+        <attr name="rigtestIcon" format="reference" />
+    </declare-styleable>
+</resources>
