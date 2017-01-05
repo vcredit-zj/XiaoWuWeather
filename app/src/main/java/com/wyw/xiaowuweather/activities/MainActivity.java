@@ -30,9 +30,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
+import retrofit2.converter.protobuf.ProtoConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -63,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
                 // .addConverterFactory(ScalarsConverterFactory.create())
                 //添加gson转换器
                 .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(ProtoConverterFactory.create())
                 //  .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .client(client)
                 .build();
@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<WetherResult<NowWetherInfo>> call, Response<WetherResult<NowWetherInfo>> response) {
                 Log.i(TAG, "这个是" + call.request().url());
-                if (response.isSuccess()) {
+                if (response.isSuccessful()) {
                     WetherResult wetherResult = response.body();
                     List<NowWetherInfo> wetherInfos = wetherResult.getResults();
                     Log.i(TAG, "当前实况" + wetherInfos.toString());

@@ -68,4 +68,5 @@ dependencies {
     compile 'com.squareup.retrofit2:converter-scalars:2.0.0-beta4'//ConverterFactory的String依赖包
     compile 'com.google.code.gson:gson:2.6.2'//Gosn解析包
     compile 'com.google.protobuf:protobuf-lite:3.0.0'
+    compile 'com.squareup.retrofit2:converter-protobuf:2.1.0'
 }
