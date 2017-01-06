@@ -4,11 +4,15 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.google.protobuf.ExtensionRegistryLite;
+import com.vcredit.zj.bean.proto.BookOuterClass;
 import com.wyw.xiaowuweather.BuildConfig;
 import com.wyw.xiaowuweather.R;
 import com.wyw.xiaowuweather.enties.NowWetherInfo;
 import com.wyw.xiaowuweather.enties.WetherResult;
 import com.wyw.xiaowuweather.service.RequesService;
+import com.wyw.xiaowuweather.service.TestProtoService;
+
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -87,11 +91,64 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * 获取测试proto数据
+     */
+    public void getProto() {
+        //添加通用请求头
+        OkHttpClient.Builder builder = new OkHttpClient().newBuilder();
+        if (BuildConfig.DEBUG) {
+            //日志拦截器
+            builder.addNetworkInterceptor(new LogInterceptor());
+
+        }
+        builder.addInterceptor(new Interceptor() {
+            @Override
+            public okhttp3.Response intercept(Chain chain) throws IOException {
+                Request request = chain.request()
+                        .newBuilder()
+                        .addHeader("Content-Type", "application/x-protobuf;charset=UTF-8")
+                        .addHeader("Accept-Encoding", "gzip, deflate")
+                        .addHeader("Connection", "keep-alive")
+                        .addHeader("Accept", "*/*")
+                        .build();
+                return chain.proceed(request);
+            }
+
+        });
+        OkHttpClient client = builder.build();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://10.141.10.80")
+                .addConverterFactory(ProtoConverterFactory.create())
+                .client(client)
+                .build();
+
+        TestProtoService requesService = retrofit.create(TestProtoService.class);
+        Call<BookOuterClass.Book> requesServiceBook = requesService.getBook();
+        requesServiceBook.enqueue(new Callback<BookOuterClass.Book>() {
+            @Override
+            public void onResponse(Call<BookOuterClass.Book> call, Response<BookOuterClass.Book> response) {
+                Log.i(TAG, "这个是" + call.request().url());
+                if (response.isSuccessful()) {
+                    BookOuterClass.Book body = response.body();
+                    Log.i(TAG, "proto数据" + body.toString());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BookOuterClass.Book> call, Throwable t) {
+                Log.e(TAG, t.toString());
+            }
+        });
+    }
+
 
     @OnClick(R.id.btn)
     public void onClick() {
 
         getNowWhther();
+        getProto();
 
     }
 }

@@ -28,28 +28,40 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    sourceSets {
+        main {
+            proto {
+                srcDir 'src/main/proto'
+            }
+
+            java {
+
+            }
+        }
+    }
 }
 
 protobuf {
-    //这里配置protoc编译器
     protoc {
         artifact = 'com.google.protobuf:protoc:3.0.0'
     }
+
     plugins {
         javalite {
             // The codegen for lite comes as a separate artifact
             artifact = 'com.google.protobuf:protoc-gen-javalite:3.0.0'
         }
     }
-    //这里配置生成目录，编译后会在build的目录下生成对应的java文件
     generateProtoTasks {
         all().each { task ->
             task.plugins {
-                javalite {}
+                javalite { }
             }
         }
     }
 }
+
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
@@ -62,11 +74,14 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
     compile 'io.reactivex:rxjava:1.1.0'//Rx的包
     compile 'io.reactivex:rxandroid:1.1.0'//Rx的包
-    compile 'com.squareup.retrofit2:retrofit:2.0.0-beta4'//Retrofit2所需要的包
-    compile 'com.squareup.retrofit2:converter-gson:2.0.0-beta4'//ConverterFactory的Gson依赖包
-    compile 'com.squareup.retrofit2:adapter-rxjava:2.0.0-beta4'//CallAdapterFactory的Rx依赖包
-    compile 'com.squareup.retrofit2:converter-scalars:2.0.0-beta4'//ConverterFactory的String依赖包
+    compile 'com.squareup.retrofit2:retrofit:2.1.0'//Retrofit2所需要的包
+    compile 'com.squareup.retrofit2:converter-gson:2.1.0'//ConverterFactory的Gson依赖包
+    compile 'com.squareup.retrofit2:adapter-rxjava:2.1.0'//CallAdapterFactory的Rx依赖包
+    compile 'com.squareup.retrofit2:converter-scalars:2.1.0'//ConverterFactory的String依赖包
+    compile 'com.squareup.retrofit2:converter-protobuf:2.2.0-SNAPSHOT', {
+        exclude group: 'com.google.protobuf', module: 'protobuf-java'
+    }
+
     compile 'com.google.code.gson:gson:2.6.2'//Gosn解析包
-    compile 'com.google.protobuf:protobuf-lite:3.0.0'
-    compile 'com.squareup.retrofit2:converter-protobuf:2.1.0'
+    compile 'com.google.protobuf:protobuf-lite:3.0.0'//Gosn解析包
 }
