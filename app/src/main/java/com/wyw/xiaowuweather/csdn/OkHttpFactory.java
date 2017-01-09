@@ -1,7 +1,13 @@
 package com.wyw.xiaowuweather.csdn;
 
+import com.wyw.xiaowuweather.WeatherApplication;
 import com.wyw.xiaowuweather.csdn.interceptor.HttpLoggingInterceptor;
+import com.wyw.xiaowuweather.csdn.interceptor.LogInterceptor;
+import com.wyw.xiaowuweather.csdn.interceptor.UserAgentInterceptor;
 
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 
 /**
@@ -18,7 +24,32 @@ public enum OkHttpFactory {
     private static final int TIMEOUT_CONNECTION = 25;
 
     OkHttpFactory() {
-        //   HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        okHttpClient = null;
+
+        //创建打印拦截器
+        HttpLoggingInterceptor interceptor =
+                new HttpLoggingInterceptor(LogInterceptor.INSTANCE);
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        //设置缓存
+        Cache cache = new Cache(WeatherApplication.mContext.getCacheDir(), 10 * 1024 * 1024);
+
+        okHttpClient = new OkHttpClient.Builder()
+                //添加打印拦截器
+                .addInterceptor(interceptor)
+                //添加UA
+                .addInterceptor(new UserAgentInterceptor(HttpHelper.getUserAgent()))
+                //失败重连
+                .retryOnConnectionFailure(true)
+                //设置可以在chrome中可以查看请求
+                //.addNetworkInterceptor(new StethoInterceptor());
+                //设置缓存目录
+                .cache(cache)
+                //请求超时
+                .readTimeout(TIMEOUT_READ, TimeUnit.SECONDS)
+                .connectTimeout(TIMEOUT_CONNECTION, TimeUnit.SECONDS)
+                .build();
+    }
+
+    public OkHttpClient getOkHttpClient() {
+        return okHttpClient;
     }
 }
